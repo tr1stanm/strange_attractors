@@ -48,3 +48,27 @@ class langford {
 		double x, y, z, dt;
 		double a, b, c, d, e, f;
 };
+
+class threeScroll {
+	public:
+		threeScroll(double = 0, double = 0, double = 0, double = 0.005);
+		~threeScroll();
+		void setVals(double, double, double, double);
+		void iterate();
+		gsl_matrix* currentCoord();
+	private:
+		double x, y, z, dt;
+		double a, b, c, d, e, f;
+};
+
+class rabinovichFabrikant {
+	public:
+		rabinovichFabrikant(double = 0, double = 0, double = 0, double = 0.005);
+		~rabinovichFabrikant();
+		void setVals(double, double, double, double);
+		void iterate();
+		gsl_matrix* currentCoord();
+	private:
+		double x, y, z, dt;
+		double alpha, gamma;
+};

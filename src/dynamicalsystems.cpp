@@ -6,13 +6,13 @@
 #include "SDL3/SDL_surface.h"
 #include "SDL3_image/SDL_image.h"
 
-const int CANVASSIZE = 900;
+const int CANVASSIZE = 800;
 const double QUADSIZE = CANVASSIZE / 2.0;
-const int NUMPOINTS = 5000;
-const int NUM_TESTPTS = 12;
-const double RANDOM_SCALE = 5;
-const double PROJ_DEPTH = 25;
-const double PROJ_SCALE = 700;
+const int NUMPOINTS = 2000;
+const int NUM_TESTPTS = 25;
+const double RANDOM_SCALE = 8;
+const double PROJ_DEPTH = 50;
+const double PROJ_SCALE = 500;
 const double ROTATION_ANGLE = .5;
 const int FPS = 60;				// FPS limiter
 
@@ -26,7 +26,7 @@ int main() {
 	int increment = 0;
 	srand(time(0));
 
-	class langford test[NUM_TESTPTS];
+	class halvorsen test[NUM_TESTPTS];
 	for(int i = 0; i < NUM_TESTPTS; ++i) {
 		test[i].setVals(((double)rand() / RAND_MAX) * RANDOM_SCALE, 
 				((double)rand() / RAND_MAX) * RANDOM_SCALE, 

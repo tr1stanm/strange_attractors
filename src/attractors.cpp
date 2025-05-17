@@ -145,3 +145,75 @@ gsl_matrix* langford::currentCoord() {
 	gsl_matrix* current = set3DPoint(x, y, z);
 	return current;
 }
+
+threeScroll::threeScroll(double xo, double yo, double zo, double t) :
+	x(xo),
+	y(yo),
+	z(zo),
+	dt(t),
+	a(40),
+	b(1.833),
+	c(55),
+	d(0.16),
+	e(0.65),
+	f(20) {}
+
+threeScroll::~threeScroll() {}
+
+void threeScroll::setVals(double xo, double yo, double zo, double t) {
+	x = xo;
+	y = yo;
+	z = zo;
+	dt = t;
+}
+
+void threeScroll::iterate() {
+	double dx, dy, dz;
+
+	dx = (a * (y - x) + (d * x * z)) * dt;
+	dy = ((c * x) - (x * z) + (f * y)) * dt;
+	dz = ((b * z) + (x * y) - (e * x * x)) * dt;
+
+	x += dx;
+	y += dy;
+	z += dz;
+}
+
+gsl_matrix* threeScroll::currentCoord() {
+	gsl_matrix* current = set3DPoint(x, y, z);
+	return current;
+}
+
+rabinovichFabrikant::rabinovichFabrikant(double xo, double yo, double zo, double t) :
+	x(xo),
+	y(yo),
+	z(zo),
+	dt(t),
+	alpha(0.14),
+	gamma(0.10) {}
+
+rabinovichFabrikant::~rabinovichFabrikant() {}
+
+void rabinovichFabrikant::setVals(double xo, double yo, double zo, double t) {
+	x = xo;
+	y = yo;
+	z = zo;
+	dt = t;
+}
+
+void rabinovichFabrikant::iterate() {
+	double dx, dy, dz;
+
+	dx = (y * (z - 1 + (x * x)) + (gamma * x)) * dt;
+	dy = (x * ((3 * z) + 1 - (x * x))) * dt;
+	dz = ((-2 * z) * (alpha + (x * y))) * dt;
+
+	x += dx;
+	y += dy;
+	z += dz;
+}
+
+gsl_matrix* rabinovichFabrikant::currentCoord() {
+	gsl_matrix* current = set3DPoint(x, y, z);
+	return current;
+}
