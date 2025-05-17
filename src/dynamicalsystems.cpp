@@ -8,11 +8,11 @@
 
 const int CANVASSIZE = 900;
 const double QUADSIZE = CANVASSIZE / 2.0;
-const int NUMPOINTS = 2000;
-const int NUM_TESTPTS = 20;
-const double RANDOM_SCALE = 100;
-const double PROJ_DEPTH = 300;
-const double PROJ_SCALE = 400;
+const int NUMPOINTS = 5000;
+const int NUM_TESTPTS = 12;
+const double RANDOM_SCALE = 5;
+const double PROJ_DEPTH = 25;
+const double PROJ_SCALE = 700;
 const double ROTATION_ANGLE = .5;
 const int FPS = 60;				// FPS limiter
 
@@ -24,9 +24,14 @@ int main() {
 	char userResponse;
 	short toExport = 0;
 	int increment = 0;
+	srand(time(0));
 
-	class lorenz test[NUM_TESTPTS];
-	for(int i = 0; i < NUM_TESTPTS; ++i) test[i].setVals(drand48() * RANDOM_SCALE, drand48() * RANDOM_SCALE, drand48() * RANDOM_SCALE, 0.005);
+	class langford test[NUM_TESTPTS];
+	for(int i = 0; i < NUM_TESTPTS; ++i) {
+		test[i].setVals(((double)rand() / RAND_MAX) * RANDOM_SCALE, 
+				((double)rand() / RAND_MAX) * RANDOM_SCALE, 
+				((double)rand() / RAND_MAX) * RANDOM_SCALE, 0.005);
+	}
 	gsl_matrix* testPoints[NUM_TESTPTS][NUMPOINTS];
 	for(int i = 0; i < NUM_TESTPTS; ++i) {
 		for(int j = 0; j < NUMPOINTS; ++j) {
