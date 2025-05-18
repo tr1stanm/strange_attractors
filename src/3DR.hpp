@@ -2,6 +2,13 @@
 #include "SDL3/SDL.h"
 #pragma once
 
+extern const int CANVASSIZE;
+extern const double QUADSIZE;
+extern const int NUMPOINTS, NUM_TESTPTS;
+extern SDL_Window *window;
+extern SDL_Renderer *renderer;
+extern short isRunning;
+
 // linear algebra
 gsl_matrix* matrixMul(gsl_matrix*, gsl_matrix*);
 void printMatrix(gsl_matrix*);
@@ -22,9 +29,5 @@ gsl_matrix* orthoProject(gsl_matrix*);
 // gfx functions
 void init(const char*, int, int, short);
 void handleEvents();
-
-extern const int CANVASSIZE;
-extern const double QUADSIZE;
-extern SDL_Window *window;
-extern SDL_Renderer *renderer;
-extern short isRunning;
+void rotateInRange(gsl_matrix***, gsl_matrix*, int, int, int, int);
+void multiThreadRotate(int, gsl_matrix***, gsl_matrix*, int, int, int, int);
