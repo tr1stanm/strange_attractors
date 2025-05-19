@@ -170,6 +170,29 @@ gsl_matrix* matrixMul(gsl_matrix *M1, gsl_matrix *M2) {
 	return M3;
 }
 
+gsl_matrix* matrixPower(gsl_matrix* M, int power) {
+	gsl_matrix *result = gsl_matrix_alloc(3, 3);
+	gsl_matrix *base = gsl_matrix_alloc(3, 3);
+	gsl_matrix *temp = nullptr;
+	gsl_matrix_set_identity(result);
+	gsl_matrix_memcpy(base, M);
+
+	while(power > 0) {
+		if(power % 2 == 1) {
+			if(temp) gsl_matrix_free(temp);
+			temp = matrixMul(result, base);
+			gsl_matrix_memcpy(result, temp);
+		}
+		if(temp) gsl_matrix_free(temp);
+		temp = matrixMul(base, base);
+		gsl_matrix_memcpy(base, temp);
+		power /= 2;
+	}
+	gsl_matrix_free(temp);
+	gsl_matrix_free(base);
+	return result;
+}
+
 void printMatrix(gsl_matrix *M) {
 	for(int row = 0; row < M->size1; ++row) {
 		for(int col = 0; col < M->size2; ++col) {

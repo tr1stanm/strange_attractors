@@ -30,7 +30,7 @@ void rotateInRange(gsl_matrix*** testPts, gsl_matrix* rMatrix, int start_totalPt
 }
 
 void multiThreadPlot(gsl_matrix ***testPts, gsl_matrix ***projPts, int numThreads, int ptsToPlot) {
-	//std::thread **threads = new std::thread*[numThreads];
+	if(ptsToPlot >= NUMPOINTS) ptsToPlot = NUMPOINTS;
 	std::vector<std::thread> threads;
 	for(int i = 0; i < numThreads; ++i) {
 		threads.emplace_back(plotInRange, testPts, projPts,

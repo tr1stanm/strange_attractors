@@ -1,6 +1,45 @@
 #include "dynamicalsystems.hpp"
 #include "3DR.hpp"
 
+gsl_matrix*** initProjPoints() {
+	gsl_matrix*** projPoints = new gsl_matrix**[NUM_TESTPTS];
+	for(int i = 0; i < NUM_TESTPTS; ++i) {
+		projPoints[i] = new gsl_matrix*[NUMPOINTS];
+		for(int j = 0; j < NUMPOINTS; ++j) {
+			projPoints[i][j] = nullptr;
+		}
+	}
+	return projPoints;
+}
+
+gsl_matrix* initRMatrix() {
+	gsl_matrix* rMatrix = gsl_matrix_alloc(3, 3);
+	gsl_matrix_set_identity(rMatrix);
+	rMatrix = rotateZ(rotateY(rotateX(rMatrix, ROTATION_ANGLE * X_ROTATE_SCALE), 
+						   ROTATION_ANGLE * Y_ROTATE_SCALE), 
+						   ROTATION_ANGLE * Z_ROTATE_SCALE);
+	return rMatrix;
+}	
+
+void drawAttractor(gsl_matrix*** projPoints, int iterations) {
+	if(iterations >= NUMPOINTS) iterations = NUMPOINTS;
+	for(int j = 0; j < NUM_TESTPTS; ++j) {
+		for(int k = 0; k < iterations - 1; ++k) {
+			SDL_SetRenderDrawColor(renderer, j * 255.0 / NUM_TESTPTS, 
+							 j * NUM_TESTPTS, 
+							 j * 510.0 / NUM_TESTPTS, 
+							 255);
+			plotVector(projPoints[j][k], projPoints[j][k+1]);
+		}
+	}
+	for(int j = 0; j < NUM_TESTPTS; ++j) {
+		for(int k = 0; k < iterations; ++k) {
+			if(projPoints[j][k]) gsl_matrix_free(projPoints[j][k]);
+			projPoints[j][k] = nullptr;
+		}
+	}
+}
+
 lorenz::lorenz(double xo, double yo, double zo, double t) :
 	x(xo),
 	y(yo),
@@ -214,6 +253,41 @@ void rabinovichFabrikant::iterate() {
 }
 
 gsl_matrix* rabinovichFabrikant::currentCoord() {
+	gsl_matrix* current = set3DPoint(x, y, z);
+	return current;
+}
+
+rossler::rossler(double xo, double yo, double zo, double t) :
+	x(xo),
+	y(yo),
+	z(zo),
+	dt(t),
+	a(0.2),
+	b(0.2),
+	c(5.7) {}
+
+rossler::~rossler() {}
+
+void rossler::setVals(double xo, double yo, double zo, double t) {
+	x = xo;
+	y = yo;
+	z = zo;
+	dt = t;
+}
+
+void rossler::iterate() {
+	double dx, dy, dz;
+
+	dx = (-(y + z)) * dt;
+	dy = (x + (a * y)) * dt;
+	dz = (b + (z * (x - c))) * dt;
+
+	x += dx;
+	y += dy;
+	z += dz;
+}
+
+gsl_matrix* rossler::currentCoord() {
 	gsl_matrix* current = set3DPoint(x, y, z);
 	return current;
 }
