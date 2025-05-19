@@ -9,7 +9,7 @@ set(CMAKE_BUILD_TYPE Debug)
 
 project(dynsys)
 
-add_executable(dynsys src/dynamicalsystems.cpp src/attractors.cpp src/3DRlinalg.cpp src/gfx.cpp)
+add_executable(dynsys src/dynamicalsystems.cpp src/attractors.cpp src/3DRlinalg.cpp src/gfx.cpp src/threads.cpp)
 
 #these commands allow the lsp to use autofill for external frameworks
 find_package(GSL REQUIRED)

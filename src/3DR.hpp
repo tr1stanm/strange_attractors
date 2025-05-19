@@ -5,6 +5,7 @@
 extern const int CANVASSIZE;
 extern const double QUADSIZE;
 extern const int NUMPOINTS, NUM_TESTPTS;
+extern const double PROJ_DEPTH, PROJ_SCALE;
 extern SDL_Window *window;
 extern SDL_Renderer *renderer;
 extern short isRunning;
@@ -29,5 +30,3 @@ gsl_matrix* orthoProject(gsl_matrix*);
 // gfx functions
 void init(const char*, int, int, short);
 void handleEvents();
-void rotateInRange(gsl_matrix***, gsl_matrix*, int, int, int, int);
-void multiThreadRotate(int, gsl_matrix***, gsl_matrix*, int, int, int, int);
