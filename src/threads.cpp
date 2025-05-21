@@ -47,8 +47,10 @@ void plotInRange(gsl_matrix ***testPts, gsl_matrix*** projPts, gsl_matrix* rMatr
 		for(int j = start_totalPts; j < end_totalPts; ++j) {
 			if(projPts[i][j]) gsl_matrix_free(projPts[i][j]);
 
-			projPts[i][j] = project(matrixMul(rMatrix, testPts[i][j]), PROJ_DEPTH);
+			gsl_matrix *rotated = matrixMul(rMatrix, testPts[i][j]);
+			projPts[i][j] = project(rotated, PROJ_DEPTH);
 			gsl_matrix_scale(projPts[i][j], PROJ_SCALE);
+			gsl_matrix_free(rotated);
 		}
 	}
 }

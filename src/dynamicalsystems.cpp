@@ -8,7 +8,7 @@
 #include <iostream>
 
 
-#define ATTRACTOR dadras
+#define ATTRACTOR lorenz
 const int CANVASSIZE = 800;
 const double QUADSIZE = CANVASSIZE / 2.0;
 const int NUMPOINTS = 500;
@@ -102,6 +102,7 @@ int main() {
 	delete[] testPoints;
 	delete[] projPoints;
 	gsl_matrix_free(rMatrix);
+	gsl_matrix_free(rTotal);
 	destroyAttractor(test);
 
 	// stitching video from the exported frames
