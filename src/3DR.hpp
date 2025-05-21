@@ -9,6 +9,7 @@ extern double PROJ_DEPTH, PROJ_SCALE;
 extern const double RANDOM_SCALE;
 extern double ROTATION_ANGLE;
 extern double X_ROTATE_SCALE, Y_ROTATE_SCALE, Z_ROTATE_SCALE;
+extern double XDELTA, YDELTA;
 extern const double DT;
 extern SDL_Window *window;
 extern SDL_Renderer *renderer;

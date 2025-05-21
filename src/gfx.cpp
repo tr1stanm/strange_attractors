@@ -1,7 +1,6 @@
 #include "3DR.hpp"
 #include "SDL3/SDL_events.h"
 #include <SDL3/SDL_video.h>
-#include <iostream>
 #include "dynamicalsystems.hpp"
 
 SDL_Renderer *renderer;
@@ -47,17 +46,29 @@ void handleEvents(gsl_matrix *&rMatrix) {
 				case SDLK_E:
 					ROTATION_ANGLE += 0.1;
 					break;
-				case SDLK_UP:
+				case SDLK_I:
 					PROJ_DEPTH -= 5;
 					break;
-				case SDLK_DOWN:
+				case SDLK_K:
 					PROJ_DEPTH += 5;
 					break;
-				case SDLK_LEFT:
+				case SDLK_J:
 					PROJ_SCALE -= 10;
 					break;
-				case SDLK_RIGHT:
+				case SDLK_L:
 					PROJ_SCALE += 10;
+					break;
+				case SDLK_UP:
+					YDELTA -= 5;
+					break;
+				case SDLK_DOWN:
+					YDELTA += 5;
+					break;
+				case SDLK_LEFT:
+					XDELTA -= 5;
+					break;
+				case SDLK_RIGHT:
+					XDELTA += 5;
 					break;
 				default:
 					break;
@@ -80,8 +91,8 @@ void plotPoint(gsl_matrix *toPlot) {
 		return;
 	}
 
-	SDL_RenderPoint(renderer, gsl_matrix_get(toPlot, 0, 0) + QUADSIZE,
-			              gsl_matrix_get(toPlot, 1, 0) + QUADSIZE);
+	SDL_RenderPoint(renderer, gsl_matrix_get(toPlot, 0, 0) + QUADSIZE + XDELTA,
+			              gsl_matrix_get(toPlot, 1, 0) + QUADSIZE + YDELTA);
 }
 
 void plotVector(gsl_matrix *p1, gsl_matrix* p2) {
@@ -90,8 +101,8 @@ void plotVector(gsl_matrix *p1, gsl_matrix* p2) {
 		return;
 	}
 
-	SDL_RenderLine(renderer, gsl_matrix_get(p1, 0, 0) + QUADSIZE, 
-				     gsl_matrix_get(p1, 1, 0) + QUADSIZE,
-	       		             gsl_matrix_get(p2, 0, 0) + QUADSIZE, 
-				     gsl_matrix_get(p2, 1, 0) + QUADSIZE);
+	SDL_RenderLine(renderer, gsl_matrix_get(p1, 0, 0) + QUADSIZE + XDELTA, 
+				     gsl_matrix_get(p1, 1, 0) + QUADSIZE + YDELTA,
+	       		             gsl_matrix_get(p2, 0, 0) + QUADSIZE + XDELTA, 
+				     gsl_matrix_get(p2, 1, 0) + QUADSIZE + YDELTA);
 }
