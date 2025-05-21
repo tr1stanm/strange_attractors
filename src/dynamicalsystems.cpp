@@ -9,17 +9,18 @@
 
 
 #define ATTRACTOR dadras
-const int CANVASSIZE = 700;
+const int CANVASSIZE = 800;
 const double QUADSIZE = CANVASSIZE / 2.0;
-const int NUMPOINTS = 1000;
-const int NUM_TESTPTS = 20;
+const int NUMPOINTS = 500;
+const int NUM_TESTPTS = 50;
 const double RANDOM_SCALE = 10;
-const double PROJ_DEPTH = 80;
-const double PROJ_SCALE = 900;
-const double ROTATION_ANGLE = .5;
-const double X_ROTATE_SCALE = 2.1;
-const double Y_ROTATE_SCALE = 1;
-const double Z_ROTATE_SCALE = 0.75;
+double PROJ_DEPTH = 50;
+double PROJ_SCALE = 700;
+double ROTATION_ANGLE = .5;
+double X_ROTATE_SCALE = 1;
+double Y_ROTATE_SCALE = 1;
+double Z_ROTATE_SCALE = 1;
+const double DT = 0.005;
 const int FPS = 120;				// FPS limiter
 
 int main() {
@@ -37,6 +38,8 @@ int main() {
 	gsl_matrix*** testPoints = initTestPoints(test);
 	gsl_matrix*** projPoints = initProjPoints();
 	gsl_matrix* rMatrix = initRMatrix();
+	gsl_matrix* rTotal = gsl_matrix_alloc(3, 3);
+	gsl_matrix_set_identity(rTotal);
 
 	printf("export frames to video? (y/n): ");
 	scanf("%c", &userResponse);
@@ -48,7 +51,7 @@ int main() {
 	init("strange-attractors", CANVASSIZE, CANVASSIZE, 0);
 
 	while(isRunning) {
-		handleEvents();
+		handleEvents(rMatrix);
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 		SDL_RenderClear(renderer);
 
@@ -59,22 +62,16 @@ int main() {
 				}
 				gsl_matrix_free(testPoints[j][NUMPOINTS-1]);
 				testPoints[j][NUMPOINTS-1] = test[j].currentCoord();
-				gsl_matrix *newRMatrix = matrixPower(rMatrix, iterations);
-				gsl_matrix *newR = matrixMul(newRMatrix, testPoints[j][NUMPOINTS-1]);
-				gsl_matrix_free(testPoints[j][NUMPOINTS-1]);
-				gsl_matrix_free(newRMatrix);
-				testPoints[j][NUMPOINTS-1] = newR;
-				//}
 				test[j].iterate();
 			}
 		}
 
-		// rotation
-		multiThreadRotate(300, testPoints, rMatrix);
-
 		// transformation, plotting, drawing
-		multiThreadPlot(testPoints, projPoints, 300, iterations);
+		multiThreadPlot(testPoints, projPoints, rTotal, 200, iterations);
 		drawAttractor(projPoints, iterations);
+		gsl_matrix *temp = matrixMul(rMatrix, rTotal);
+		gsl_matrix_free(rTotal);
+		rTotal = temp;
 
 		// exporting (optional obv)
 		if(toExport) {
@@ -113,5 +110,6 @@ int main() {
 		system("rm -r ../anim/");
 		std::cout << "100% done." << std::endl;
 	}
+	std::cout << "\rquitting program...     \n";
 }
 

@@ -29,11 +29,11 @@ void rotateInRange(gsl_matrix*** testPts, gsl_matrix* rMatrix, int start_totalPt
 	}
 }
 
-void multiThreadPlot(gsl_matrix ***testPts, gsl_matrix ***projPts, int numThreads, int ptsToPlot) {
+void multiThreadPlot(gsl_matrix ***testPts, gsl_matrix ***projPts, gsl_matrix *rMatrix, int numThreads, int ptsToPlot) {
 	if(ptsToPlot >= NUMPOINTS) ptsToPlot = NUMPOINTS;
 	std::vector<std::thread> threads;
 	for(int i = 0; i < numThreads; ++i) {
-		threads.emplace_back(plotInRange, testPts, projPts,
+		threads.emplace_back(plotInRange, testPts, projPts, rMatrix,
 					     ptsToPlot * i / numThreads,
 					     ptsToPlot * (i + 1) / numThreads);
 	}
@@ -42,12 +42,12 @@ void multiThreadPlot(gsl_matrix ***testPts, gsl_matrix ***projPts, int numThread
 	}
 }
 
-void plotInRange(gsl_matrix ***testPts, gsl_matrix*** projPts, int start_totalPts, int end_totalPts) {
+void plotInRange(gsl_matrix ***testPts, gsl_matrix*** projPts, gsl_matrix* rMatrix, int start_totalPts, int end_totalPts) {
 	for(int i = 0; i < NUM_TESTPTS; ++i) {
 		for(int j = start_totalPts; j < end_totalPts; ++j) {
 			if(projPts[i][j]) gsl_matrix_free(projPts[i][j]);
 
-			projPts[i][j] = project(testPts[i][j], PROJ_DEPTH);
+			projPts[i][j] = project(matrixMul(rMatrix, testPts[i][j]), PROJ_DEPTH);
 			gsl_matrix_scale(projPts[i][j], PROJ_SCALE);
 		}
 	}

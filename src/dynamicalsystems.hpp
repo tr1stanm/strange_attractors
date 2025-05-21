@@ -8,7 +8,7 @@ TYPE* initAttractor() {
 	for(int i = 0; i < NUM_TESTPTS; ++i) {
 		test[i].setVals(((double)rand() / RAND_MAX) * RANDOM_SCALE, 
 				((double)rand() / RAND_MAX) * RANDOM_SCALE, 
-				((double)rand() / RAND_MAX) * RANDOM_SCALE, 0.005);
+				((double)rand() / RAND_MAX) * RANDOM_SCALE, DT);
 	}
 	return test;
 }
@@ -112,6 +112,42 @@ class rossler {
 	public:
 		rossler(double = 0, double = 0, double = 0, double = 0.005);
 		~rossler();
+		void setVals(double, double, double, double);
+		void iterate();
+		gsl_matrix* currentCoord();
+	private:
+		double x, y, z, dt;
+		double a, b, c;
+};
+
+class quadratic3D {
+	public:
+		quadratic3D(double = 0, double = 0, double = 0, double = 0.005);
+		~quadratic3D();
+		void setVals(double, double, double, double);
+		void iterate();
+		gsl_matrix* currentCoord();
+	private:
+		double x, y, z, dt;
+		double p[30];
+};
+
+class sprottLinz {
+	public:
+		sprottLinz(double = 0, double = 0, double = 0, double = 0.005);
+		~sprottLinz();
+		void setVals(double, double, double, double);
+		void iterate();
+		gsl_matrix* currentCoord();
+	private:
+		double x, y, z, dt;
+		double a;
+};
+
+class sprottB {
+	public:
+		sprottB(double = 0, double = 0, double = 0, double = 0.005);
+		~sprottB();
 		void setVals(double, double, double, double);
 		void iterate();
 		gsl_matrix* currentCoord();

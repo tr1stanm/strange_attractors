@@ -1,6 +1,8 @@
 #include "3DR.hpp"
 #include "SDL3/SDL_events.h"
 #include <SDL3/SDL_video.h>
+#include <iostream>
+#include "dynamicalsystems.hpp"
 
 SDL_Renderer *renderer;
 SDL_Window *window;
@@ -12,12 +14,60 @@ void init(const char *title, int w, int h, short isFullscreen) {
 	if(renderer) isRunning = 1;
 }
 
-void handleEvents() {
+void handleEvents(gsl_matrix *&rMatrix) {
 	SDL_Event event;
 	SDL_PollEvent(&event);
 	switch(event.type) {
 		case SDL_EVENT_QUIT:
 			isRunning = 0;
+			break;
+		case SDL_EVENT_KEY_DOWN:
+			switch(event.key.key) {
+				case SDLK_S:
+					X_ROTATE_SCALE -= 0.1;
+					break;
+				case SDLK_W:
+					X_ROTATE_SCALE += 0.1;
+					break;
+				case SDLK_A:
+					Y_ROTATE_SCALE -= 0.1;
+					break;
+				case SDLK_D:
+					Y_ROTATE_SCALE += 0.1;
+					break;
+				case SDLK_Z:
+					Z_ROTATE_SCALE -= 0.1;
+					break;
+				case SDLK_X:
+					Z_ROTATE_SCALE += 0.1;
+					break;
+				case SDLK_Q:
+					ROTATION_ANGLE -= 0.1;
+					break;
+				case SDLK_E:
+					ROTATION_ANGLE += 0.1;
+					break;
+				case SDLK_UP:
+					PROJ_DEPTH -= 5;
+					break;
+				case SDLK_DOWN:
+					PROJ_DEPTH += 5;
+					break;
+				case SDLK_LEFT:
+					PROJ_SCALE -= 10;
+					break;
+				case SDLK_RIGHT:
+					PROJ_SCALE += 10;
+					break;
+				default:
+					break;
+			}
+			gsl_matrix_free(rMatrix);
+			rMatrix = initRMatrix();
+			break;
+		case SDL_EVENT_KEY_UP:
+			break;
+
 	default:
 			break;
 	}

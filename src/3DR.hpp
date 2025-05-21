@@ -5,9 +5,11 @@
 extern const int CANVASSIZE;
 extern const double QUADSIZE;
 extern const int NUMPOINTS, NUM_TESTPTS;
-extern const double PROJ_DEPTH, PROJ_SCALE;
+extern double PROJ_DEPTH, PROJ_SCALE;
 extern const double RANDOM_SCALE;
-extern const double ROTATION_ANGLE, X_ROTATE_SCALE, Y_ROTATE_SCALE, Z_ROTATE_SCALE;
+extern double ROTATION_ANGLE;
+extern double X_ROTATE_SCALE, Y_ROTATE_SCALE, Z_ROTATE_SCALE;
+extern const double DT;
 extern SDL_Window *window;
 extern SDL_Renderer *renderer;
 extern short isRunning;
@@ -32,4 +34,4 @@ gsl_matrix* orthoProject(gsl_matrix*);
 
 // gfx functions
 void init(const char*, int, int, short);
-void handleEvents();
+void handleEvents(gsl_matrix*&);

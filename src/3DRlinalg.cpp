@@ -8,7 +8,6 @@ gsl_matrix* project(gsl_matrix *toProject, double distance) {
 	else if(toProject->size1 == 4) projMatrix = gsl_matrix_alloc(2, 4);
 	else return NULL;
 
-	//double constant = 1 / (distance - gsl_matrix_get(toProject, 2, 0));
 	double xp = 1 / (distance - gsl_matrix_get(toProject, 2, 0));
 	double yp = 1 / (distance - gsl_matrix_get(toProject, 2, 0));
 	// this doesn't work with the cube bc it multiplies both points by the 1/z of the first
@@ -170,6 +169,7 @@ gsl_matrix* matrixMul(gsl_matrix *M1, gsl_matrix *M2) {
 	return M3;
 }
 
+// O(lg(n)) for powers of n.
 gsl_matrix* matrixPower(gsl_matrix* M, int power) {
 	gsl_matrix *result = gsl_matrix_alloc(3, 3);
 	gsl_matrix *base = gsl_matrix_alloc(3, 3);
