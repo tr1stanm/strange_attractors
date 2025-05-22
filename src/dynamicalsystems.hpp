@@ -1,5 +1,6 @@
 #include "gsl/gsl_matrix.h"
 #include "3DR.hpp"
+#include <string>
 
 template<typename TYPE>
 TYPE* initAttractor() {
@@ -42,6 +43,7 @@ class lorenz {
 		void setVals(double, double, double, double);
 		void iterate();
 		gsl_matrix* currentCoord();
+		std::string attractorName;
 
 	private:
 		double x, y, z, dt;
@@ -55,6 +57,7 @@ class halvorsen {
 		void setVals(double, double, double, double);
 		void iterate();
 		gsl_matrix* currentCoord();
+		std::string attractorName;
 	private:
 		double x, y, z, dt;
 		double a;
@@ -67,6 +70,7 @@ class dadras {
 		void setVals(double, double, double, double);
 		void iterate();
 		gsl_matrix* currentCoord();
+		std::string attractorName;
 	private:
 		double x, y, z, dt;
 		double a, b, c, d, e;
@@ -79,6 +83,7 @@ class langford {
 		void setVals(double, double, double, double);
 		void iterate();
 		gsl_matrix* currentCoord();
+		std::string attractorName;
 	private:
 		double x, y, z, dt;
 		double a, b, c, d, e, f;
@@ -91,6 +96,7 @@ class threeScroll {
 		void setVals(double, double, double, double);
 		void iterate();
 		gsl_matrix* currentCoord();
+		std::string attractorName;
 	private:
 		double x, y, z, dt;
 		double a, b, c, d, e, f;
@@ -103,6 +109,7 @@ class rabinovichFabrikant {
 		void setVals(double, double, double, double);
 		void iterate();
 		gsl_matrix* currentCoord();
+		std::string attractorName;
 	private:
 		double x, y, z, dt;
 		double alpha, gamma;
@@ -115,6 +122,7 @@ class rossler {
 		void setVals(double, double, double, double);
 		void iterate();
 		gsl_matrix* currentCoord();
+		std::string attractorName;
 	private:
 		double x, y, z, dt;
 		double a, b, c;
@@ -127,6 +135,7 @@ class quadratic3D {
 		void setVals(double, double, double, double);
 		void iterate();
 		gsl_matrix* currentCoord();
+		std::string attractorName;
 	private:
 		double x, y, z, dt;
 		double p[30];
@@ -139,6 +148,7 @@ class sprottLinz {
 		void setVals(double, double, double, double);
 		void iterate();
 		gsl_matrix* currentCoord();
+		std::string attractorName;
 	private:
 		double x, y, z, dt;
 		double a;
@@ -151,6 +161,7 @@ class sprottB {
 		void setVals(double, double, double, double);
 		void iterate();
 		gsl_matrix* currentCoord();
+		std::string attractorName;
 	private:
 		double x, y, z, dt;
 		double a, b, c;

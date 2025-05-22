@@ -15,6 +15,7 @@ add_executable(dynsys src/dynamicalsystems.cpp src/attractors.cpp src/3DRlinalg.
 find_package(GSL REQUIRED)
 find_package(SDL3 REQUIRED)
 find_package(SDL3_IMAGE REQUIRED)
+find_package(SDL3_TTF REQUIRED)
 find_package(Threads REQUIRED)
 
-target_link_libraries(dynsys PRIVATE GSL::gsl SDL3::SDL3 SDL3::Headers SDL3_image::SDL3_image Threads::Threads)
+target_link_libraries(dynsys PRIVATE GSL::gsl SDL3::SDL3 SDL3::Headers SDL3_image::SDL3_image Threads::Threads SDL3_ttf::SDL3_ttf)

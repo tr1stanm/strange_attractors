@@ -1,5 +1,7 @@
 #include "gsl/gsl_matrix.h"
 #include "SDL3/SDL.h"
+#include "SDL3_ttf/SDL_ttf.h"
+#include <string>
 #pragma once
 
 extern const int CANVASSIZE;
@@ -10,9 +12,11 @@ extern const double RANDOM_SCALE;
 extern double ROTATION_ANGLE;
 extern double X_ROTATE_SCALE, Y_ROTATE_SCALE, Z_ROTATE_SCALE;
 extern double XDELTA, YDELTA;
+extern const bool DEBUG;
 extern const double DT;
 extern SDL_Window *window;
 extern SDL_Renderer *renderer;
+extern TTF_Font *font;
 extern short isRunning;
 
 // linear algebra
@@ -36,3 +40,4 @@ gsl_matrix* orthoProject(gsl_matrix*);
 // gfx functions
 void init(const char*, int, int, short);
 void handleEvents(gsl_matrix*&);
+void renderText(int, std::string);

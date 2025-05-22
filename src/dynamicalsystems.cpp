@@ -5,16 +5,21 @@
 #include <SDL3/SDL_timer.h>
 #include "SDL3/SDL_surface.h"
 #include "SDL3_image/SDL_image.h"
+#include "SDL3_ttf/SDL_ttf.h"
 #include <iostream>
 
 // current attractors supported: 
 // lorenz, halvorsen, dadras, langford, threeScroll, rabinovichFabrikant, rossler, sprottB
 #define ATTRACTOR dadras
-const int CANVASSIZE = 700;
+const int CANVASSIZE = 900;
 const double QUADSIZE = CANVASSIZE / 2.0;
-const int NUMPOINTS = 500;
+const int NUMPOINTS = 1000;
 const int NUM_TESTPTS = 50;
-const double RANDOM_SCALE = 8;
+const double RANDOM_SCALE = 2;
+const double DT = 0.005;
+const int FPS = 120;
+const bool DEBUG = false;
+
 double PROJ_DEPTH = 50;
 double PROJ_SCALE = 400;
 double ROTATION_ANGLE = 1;
@@ -23,8 +28,6 @@ double Y_ROTATE_SCALE = 0;
 double Z_ROTATE_SCALE = 0;
 double XDELTA = 0;
 double YDELTA = 0;
-const double DT = 0.005;
-const int FPS = 120;				// FPS limiter
 
 int main() {
 	const double frameDelay = 1000.0/FPS;
@@ -87,6 +90,7 @@ int main() {
 		}
 
 		// rendering
+		renderText(iterations, test->attractorName);
 		SDL_RenderPresent(renderer);
 		frameTime = SDL_GetTicks() - frameStart;
 		if(frameTime < frameDelay) SDL_Delay(frameDelay - frameTime);
@@ -107,6 +111,7 @@ int main() {
 	gsl_matrix_free(rMatrix);
 	gsl_matrix_free(rTotal);
 	destroyAttractor(test);
+	TTF_CloseFont(font);
 
 	// stitching video from the exported frames
 	if(toExport) {

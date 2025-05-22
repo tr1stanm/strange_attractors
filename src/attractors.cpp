@@ -47,7 +47,8 @@ lorenz::lorenz(double xo, double yo, double zo, double t) :
 	dt(t),
 	sigma(10),
 	rho(28),
-	beta(8/3.0) {}
+	beta(8/3.0),
+	attractorName("lorenz"){}
 
 lorenz::~lorenz() {}
 
@@ -80,7 +81,8 @@ halvorsen::halvorsen(double xo, double yo, double zo, double t) :
 	y(yo),
 	z(zo),
 	dt(t),
-	a(1.89) {}
+	a(1.89),
+	attractorName("halvorsen"){}
 
 halvorsen::~halvorsen() {}
 
@@ -117,7 +119,8 @@ dadras::dadras(double xo, double yo, double zo, double t) :
 	b(2.7),
 	c(1.7),
 	d(2),
-	e(9) {}
+	e(9),
+	attractorName("dadras"){}
 
 dadras::~dadras() {}
 
@@ -155,7 +158,8 @@ langford::langford(double xo, double yo, double zo, double t) :
 	c(0.6),
 	d(3.5),
 	e(0.25),
-	f(0.1) {}
+	f(0.1),
+	attractorName("langford"){}
 
 langford::~langford() {}
 
@@ -195,7 +199,8 @@ threeScroll::threeScroll(double xo, double yo, double zo, double t) :
 	c(55),
 	d(0.16),
 	e(0.65),
-	f(20) {}
+	f(20),
+	attractorName("three-scroll"){}
 
 threeScroll::~threeScroll() {}
 
@@ -229,7 +234,8 @@ rabinovichFabrikant::rabinovichFabrikant(double xo, double yo, double zo, double
 	z(zo),
 	dt(t),
 	alpha(0.14),
-	gamma(0.10) {}
+	gamma(0.10),
+	attractorName("rabinovich-fabrikant"){}
 
 rabinovichFabrikant::~rabinovichFabrikant() {}
 
@@ -264,7 +270,8 @@ rossler::rossler(double xo, double yo, double zo, double t) :
 	dt(t),
 	a(0.2),
 	b(0.2),
-	c(5.7) {}
+	c(5.7),
+	attractorName("rossler"){}
 
 rossler::~rossler() {}
 
@@ -296,7 +303,8 @@ quadratic3D::quadratic3D(double xo, double yo, double zo, double t) :
 	x(xo),
 	y(yo),
 	z(zo),
-	dt(t) {
+	dt(t),
+	attractorName("sprott quadratic 3D") {
 	p[0] = -0.875;
 	p[1] = -0.173;
 	p[2] = 0.307;
@@ -367,7 +375,8 @@ sprottLinz::sprottLinz(double xo, double yo, double zo, double t) :
 	y(yo),
 	z(zo),
 	dt(t),
-	a(0.5) {}
+	a(0.5),
+	attractorName("sprott-linz") {}
 
 sprottLinz::~sprottLinz() {}
 
@@ -403,7 +412,8 @@ sprottB::sprottB(double xo, double yo, double zo, double t) :
 	dt(t),
 	a(0.4),
 	b(1.2),
-	c(1) {}
+	c(1),
+	attractorName("sprott B") {}
 
 sprottB::~sprottB() {}
 
