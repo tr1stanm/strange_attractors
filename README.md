@@ -67,6 +67,7 @@ This program uses keyboard controls to change the attractor being displayed.
 - O / P: Change color scheme
 - < / >: Change current attractor being displayed
 - C: Take a screenshot (saves to screenshots folder in project directory)
+- The number keys (1-0) can also be used to switch to any of the 10 different attractors more quickly if desired.
 
 ## Screenshots and Examples
 
