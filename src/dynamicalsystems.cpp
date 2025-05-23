@@ -8,8 +8,8 @@
 // lorenz, halvorsen, dadras, langford, threeScroll, rabinovichFabrikant, rossler, sprottB
 const int CANVASSIZE = 900;
 const double QUADSIZE = CANVASSIZE / 2.0;
-const int NUMPOINTS = 500;
-const int NUM_TESTPTS = 50;
+const int NUMPOINTS = 400;
+const int NUM_TESTPTS = 100;
 const int FPS = 120;
 const bool DEBUG = false;
 
@@ -40,6 +40,6 @@ int main() {
 		system("ffmpeg -f image2 -framerate 60 -i ../anim/frame_%04d.png -vcodec libx264 -pix_fmt yuv420p -crf 17 anim.mp4");
 		system("rm -r ../anim/");
 	}
-	std::cout << "\rquitting program...     \n";
+	std::cout << "\rquitting program...\n";
 }
 

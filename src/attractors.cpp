@@ -18,7 +18,7 @@ attractors::attractors() :
 	iterations(0),
 	currentTypeID(0),
 	currentShaderID(0),
-	numShaders(4)
+	numShaders(5)
 {
 	initAttractor_typeID();
 	attractors::initRMatrix();
@@ -67,6 +67,10 @@ void attractors::initShaders() {
 	shaders[3].rd = 510.0 / NUM_TESTPTS;
 	shaders[3].gd = 1000.0 / NUM_TESTPTS;
 	shaders[3].bd = 55;
+	
+	shaders[4].rd = 0;
+	shaders[4].gd = 120.0 / NUM_TESTPTS;
+	shaders[4].bd = 300.0 / NUM_TESTPTS;
 }
 
 void attractors::updateShaderID(bool next) {
@@ -292,6 +296,7 @@ void attractors::switchAttractor() {
 	projScale = 600;
 	xRotateScale = yRotateScale = zRotateScale = 0;
 	xDelta = yDelta = 0;
+	rotationAngle = 1;
 	iterations = 0;
 	for(int i = 0; i < NUM_TESTPTS; ++i) delete attractor[i];
 	delete[] attractor;
