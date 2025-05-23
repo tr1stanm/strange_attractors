@@ -1,35 +1,372 @@
-#include "dynamicalsystems.hpp"
 #include "3DR.hpp"
+#include "dynamicalsystems.hpp"
+#include "attractors.hpp"
+#include <thread>
+#include <sstream>
+#include <iostream>
 
-gsl_matrix*** initProjPoints() {
-	gsl_matrix*** projPoints = new gsl_matrix**[NUM_TESTPTS];
+attractors::attractors() :
+	projDepth(50),
+	projScale(600),
+	rotationAngle(1),
+	xRotateScale(0),
+	yRotateScale(0),
+	zRotateScale(0),
+	xDelta(0),
+	yDelta(0),
+	running(false),
+	iterations(0),
+	currentTypeID(0),
+	currentShaderID(0),
+	numShaders(4)
+{
+	initAttractor_typeID();
+	attractors::initRMatrix();
+	rTotal = gsl_matrix_alloc(3, 3);
+	gsl_matrix_set_identity(rTotal);
+	initShaders();
+	currentShader = shaders[0];
+	testPoints = initTestPoints(attractor);
+	attractors::initProjPoints();
+	attractors::gfxInit("strange-attractors", CANVASSIZE, CANVASSIZE, false);
+}
+
+attractors::~attractors() {
+	for(int i = 0; i < NUM_TESTPTS; ++i) {
+		for(int j = 0; j < NUMPOINTS; ++j) {
+			gsl_matrix_free(testPoints[i][j]);
+		}
+		delete testPoints[i];
+		delete projPoints[i];
+	}
+	delete[] testPoints;
+	delete[] projPoints;
+	delete[] shaders;
+	gsl_matrix_free(rMatrix);
+	gsl_matrix_free(rTotal);
+	for(int i = 0; i < NUM_TESTPTS; ++i) delete attractor[i];
+	delete[] attractor;
+	TTF_CloseFont(font);
+}
+
+void attractors::initShaders() {
+	shaders = new shader[numShaders];
+
+	shaders[0].rd = 255.0 / NUM_TESTPTS;
+	shaders[0].gd = NUM_TESTPTS;
+	shaders[0].bd = 510.0 / NUM_TESTPTS;
+
+	shaders[1].rd = 120.0 / NUM_TESTPTS;
+	shaders[1].gd = 0;
+	shaders[1].bd = 700.0 / NUM_TESTPTS;
+
+	shaders[2].rd = 500.0 / NUM_TESTPTS;
+	shaders[2].gd = 60;
+	shaders[2].bd = 120;
+
+	shaders[3].rd = 510.0 / NUM_TESTPTS;
+	shaders[3].gd = 1000.0 / NUM_TESTPTS;
+	shaders[3].bd = 55;
+}
+
+void attractors::updateShaderID(bool next) {
+	if(next) {
+		if(currentShaderID == numShaders - 1) currentShaderID = 0;
+		else ++currentShaderID;
+	}
+	else {
+		if(!currentShaderID) currentShaderID = numShaders - 1;
+		else --currentShaderID;
+	}
+	currentShader = shaders[currentShaderID];
+}
+
+void attractors::gfxInit(const char *title, int w, int h, bool isFullscreen) {
+	window = SDL_CreateWindow(title, w, h, isFullscreen);
+	if(window) {
+		renderer = SDL_CreateRenderer(window, NULL);
+		if(DEBUG) printf("window created.\n");
+	}
+	if(renderer) {
+		running = true;
+		if(DEBUG) printf("renderer created.\n");
+	}
+	TTF_Init();
+	char filepath[256];
+	snprintf(filepath, 256, "%s../assets/ByteBounce.ttf", SDL_GetBasePath());
+	font = TTF_OpenFont(filepath, 64);
+	if(DEBUG) {
+		if(font) printf("font loaded.\n");
+		else printf("font not opened. make sure your fonts are in the assets folder.\n");
+	}
+}
+
+void attractors::handleEvents() {
+	SDL_Event event;
+	SDL_PollEvent(&event);
+	switch(event.type) {
+		case SDL_EVENT_QUIT:
+			running = false;
+			break;
+		case SDL_EVENT_KEY_DOWN:
+			switch(event.key.key) {
+				case SDLK_S:
+					xRotateScale -= 0.1;
+					break;
+				case SDLK_W:
+					xRotateScale += 0.1;
+					break;
+				case SDLK_A:
+					yRotateScale -= 0.1;
+					break;
+				case SDLK_D:
+					yRotateScale += 0.1;
+					break;
+				case SDLK_Z:
+					zRotateScale -= 0.1;
+					break;
+				case SDLK_X:
+					zRotateScale += 0.1;
+					break;
+				case SDLK_Q:
+					rotationAngle -= 0.1;
+					break;
+				case SDLK_E:
+					rotationAngle += 0.1;
+					break;
+				case SDLK_UP:
+					projDepth -= 1;
+					break;
+				case SDLK_DOWN:
+					projDepth += 1;
+					break;
+				case SDLK_LEFT:
+					projScale -= 10;
+					break;
+				case SDLK_RIGHT:
+					projScale += 10;
+					break;
+				case SDLK_I:
+					yDelta -= 1;
+					break;
+				case SDLK_K:
+					yDelta += 1;
+					break;
+				case SDLK_J:
+					xDelta -= 1;
+					break;
+				case SDLK_L:
+					xDelta += 1;
+					break;
+				case SDLK_SPACE:
+					xRotateScale = 0;
+					yRotateScale = 0;
+					zRotateScale = 0;
+					rotationAngle = 1;
+					break;
+				case SDLK_PERIOD:
+					updateTypeID(true);
+					switchAttractor();
+					break;
+				case SDLK_COMMA:
+					updateTypeID(false);
+					switchAttractor();
+					break;
+				case SDLK_O:
+					updateShaderID(false);
+					break;
+				case SDLK_P:
+					updateShaderID(true);
+					break;
+				default:
+					break;
+			}
+			gsl_matrix_free(rMatrix);
+			initRMatrix();
+			break;
+	}
+}
+
+void attractors::renderText() {
+	std::stringstream text;
+	SDL_Color color;
+	SDL_FRect dest;
+	color.a = color.r = color.b = color.g = 255;
+	text.setf(std::ios::fixed);
+	text.precision(2);
+
+	dest.x = 10;
+	dest.y =  4 * CANVASSIZE / 5.0;
+	dest.w = 3 * CANVASSIZE / 10.0;
+	dest.h = CANVASSIZE / 5.0;
+
+	text << attractor[0]->attractorName << " attractor\n";
+	text << "x rotation: " << xRotateScale * rotationAngle << "\n";
+	text << "y rotation: " << yRotateScale * rotationAngle << "\n";
+	text << "z rotation: " << zRotateScale * rotationAngle << "\n";
+	text << "depth: " << projDepth << "\n";
+	text << "scale: " << projScale << "\n";
+	double tempyd;
+	if(!yDelta) tempyd = 0;
+	else tempyd = -yDelta;
+	text << "current origin: (" << xDelta << ", " << tempyd << ")\n";
+	SDL_Surface *textSurf = TTF_RenderText_Solid_Wrapped(font, text.str().c_str(), 0, color, 0);
+	SDL_Texture *tex = SDL_CreateTextureFromSurface(renderer, textSurf);
+	SDL_RenderTexture(renderer, tex, NULL, &dest);
+	SDL_DestroySurface(textSurf);
+	SDL_DestroyTexture(tex);
+	
+}
+
+void attractors::initAttractor_typeID() {
+	switch(currentTypeID) {
+		case 0: 
+			attractor = initAttractor<lorenz>(0.005, 10);
+			projDepth = 65;
+			projScale = 250;
+			break;
+		case 1: 
+			attractor = initAttractor<halvorsen>(0.005, 5);
+			break;
+		case 2: 
+			attractor = initAttractor<dadras>(0.005, 5);
+			projDepth = 40;
+			projScale = 800;
+			break;
+		case 3: 
+			attractor = initAttractor<langford>(0.005, 2);
+			projDepth = 10;
+			projScale = 1000;
+			break;
+		case 4: 
+			attractor = initAttractor<threeScroll>(0.0005, 5);
+			projDepth = 175;
+			projScale = 250;
+			break;
+		case 5: 
+			attractor = initAttractor<rabinovichFabrikant>(0.0005, 5);
+			projDepth = 30;
+			projScale = 700;
+			break;
+		case 6: 
+			attractor = initAttractor<rossler>(0.01, 5);
+			break;
+		case 7: 
+			attractor = initAttractor<sprottLinz>(0.01, .1);
+			projDepth = 10;
+			projScale = 800;
+			break;
+		case 8: 
+			attractor = initAttractor<sprottB>(0.05, 5);
+			projDepth = 25;
+			break;
+		default:
+			// this would be bad
+			std::cerr << "error: no attractor with typeID " << currentTypeID << "exists.\n";
+			break;
+	}
+}
+
+void attractors::initRMatrix() {
+	rMatrix = gsl_matrix_alloc(3, 3);
+	gsl_matrix_set_identity(rMatrix);
+	rMatrix = rotateZ(rotateY(rotateX(rMatrix, rotationAngle * xRotateScale), 
+						   rotationAngle * yRotateScale), 
+						   rotationAngle * zRotateScale);
+}
+
+void attractors::initProjPoints() {
+	projPoints = new gsl_matrix**[NUM_TESTPTS];
 	for(int i = 0; i < NUM_TESTPTS; ++i) {
 		projPoints[i] = new gsl_matrix*[NUMPOINTS];
 		for(int j = 0; j < NUMPOINTS; ++j) {
 			projPoints[i][j] = nullptr;
 		}
 	}
-	return projPoints;
 }
 
-gsl_matrix* initRMatrix() {
-	gsl_matrix* rMatrix = gsl_matrix_alloc(3, 3);
-	gsl_matrix_set_identity(rMatrix);
-	rMatrix = rotateZ(rotateY(rotateX(rMatrix, ROTATION_ANGLE * X_ROTATE_SCALE), 
-						   ROTATION_ANGLE * Y_ROTATE_SCALE), 
-						   ROTATION_ANGLE * Z_ROTATE_SCALE);
-	return rMatrix;
-}	
+void attractors::switchAttractor() {
+	// resets to defaults
+	gsl_matrix_set_identity(rTotal);
+	projDepth = 50;
+	projScale = 600;
+	xRotateScale = yRotateScale = zRotateScale = 0;
+	xDelta = yDelta = 0;
+	iterations = 0;
+	for(int i = 0; i < NUM_TESTPTS; ++i) delete attractor[i];
+	delete[] attractor;
+	initAttractor_typeID();
+	testPoints = initTestPoints(attractor);
+}
 
-void drawAttractor(gsl_matrix*** projPoints, int iterations) {
+void attractors::update() {
+	handleEvents();
+	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+	SDL_RenderClear(renderer);
+
+	if(iterations >= NUMPOINTS) {
+		for(int j = 0; j < NUM_TESTPTS; ++j) {
+			for(int k = 0; k < NUMPOINTS-1; ++k) {
+				gsl_matrix_swap(testPoints[j][k], testPoints[j][k+1]);
+			}
+			gsl_matrix_free(testPoints[j][NUMPOINTS-1]);
+			testPoints[j][NUMPOINTS-1] = attractor[j]->currentCoord();
+			attractor[j]->iterate();
+		}
+	}
+
+	// transformation, plotting, drawing
+	plot();
+	drawAttractor();
+	gsl_matrix *temp = matrixMul(rMatrix, rTotal);
+	gsl_matrix_free(rTotal);
+	rTotal = temp;
+
+	// rendering
+	renderText();
+	SDL_RenderPresent(renderer);
+
+	++iterations;
+}
+
+void attractors::plot() {
+	int ptsToPlot = iterations;
+	if(ptsToPlot >= NUMPOINTS) ptsToPlot = NUMPOINTS;
+	std::vector<std::thread> threads;
+	for(int i = 0; i < 200; ++i) {
+		threads.emplace_back(&attractors::plotInRange, this,
+				     ptsToPlot * i / 200,
+				     ptsToPlot * (i + 1) / 200);
+	}
+	for(int i = 0; i < 200; ++i) {
+		threads[i].join();
+	}
+
+}
+
+void attractors::plotInRange(int start_totalPts, int end_totalPts) {
+	for(int i = 0; i < NUM_TESTPTS; ++i) {
+		for(int j = start_totalPts; j < end_totalPts; ++j) {
+			if(projPoints[i][j]) gsl_matrix_free(projPoints[i][j]);
+
+			gsl_matrix *rotated = matrixMul(rTotal, testPoints[i][j]);
+			projPoints[i][j] = project(rotated, projDepth);
+			gsl_matrix_scale(projPoints[i][j], projScale);
+			gsl_matrix_free(rotated);
+		}
+	}
+	
+}
+
+void attractors::drawAttractor() {
 	if(iterations >= NUMPOINTS) iterations = NUMPOINTS;
 	for(int j = 0; j < NUM_TESTPTS; ++j) {
 		for(int k = 0; k < iterations - 1; ++k) {
-			SDL_SetRenderDrawColor(renderer, j * 255.0 / NUM_TESTPTS, 
-							 j * NUM_TESTPTS, 
-							 j * 510.0 / NUM_TESTPTS, 
+			SDL_SetRenderDrawColor(renderer, j * currentShader.rd, 
+							 j * currentShader.gd, 
+							 j * currentShader.bd, 
 							 255);
-			plotVector(projPoints[j][k], projPoints[j][k+1]);
+			plotVector(renderer, projPoints[j][k], projPoints[j][k+1], xDelta, yDelta);
 		}
 	}
 	for(int j = 0; j < NUM_TESTPTS; ++j) {
@@ -38,406 +375,20 @@ void drawAttractor(gsl_matrix*** projPoints, int iterations) {
 			projPoints[j][k] = nullptr;
 		}
 	}
+	
 }
 
-lorenz::lorenz(double xo, double yo, double zo, double t) :
-	x(xo),
-	y(yo),
-	z(zo),
-	dt(t),
-	sigma(10),
-	rho(28),
-	beta(8/3.0),
-	attractorName("lorenz"){}
-
-lorenz::~lorenz() {}
-
-void lorenz::iterate() {
-	double dx, dy, dz;
-
-	dx = (sigma * (y - x)) * dt;
-	dy = (x * (rho - z) - y) * dt;
-	dz = ((x * y) - (beta * z)) * dt;
-
-	x += dx;
-	y += dy;
-	z += dz;
+bool attractors::isRunning() {
+	return running;
 }
 
-void lorenz::setVals(double xo, double yo, double zo, double t) {
-	x = xo;
-	y = yo;
-	z = zo;
-	dt = t;
-}
-
-gsl_matrix* lorenz::currentCoord() {
-	gsl_matrix* current = set3DPoint(x, y, z);
-	return current;
-}
-
-halvorsen::halvorsen(double xo, double yo, double zo, double t) :
-	x(xo),
-	y(yo),
-	z(zo),
-	dt(t),
-	a(1.89),
-	attractorName("halvorsen"){}
-
-halvorsen::~halvorsen() {}
-
-void halvorsen::setVals(double xo, double yo, double zo, double t) {
-	x = xo;
-	y = yo;
-	z = zo;
-	dt = t;
-}
-
-void halvorsen::iterate() {
-	double dx, dy, dz;
-
-	dx = ((-a * x) - (4 * y) - (4 * z) - (y * y)) * dt;
-	dy = ((-a * y) - (4 * z) - (4 * x) - (z * z)) * dt;
-	dz = ((-a * z) - (4 * x) - (4 * y) - (x * x)) * dt;
-
-	x += dx;
-	y += dy;
-	z += dz;
-}
-
-gsl_matrix* halvorsen::currentCoord() {
-	gsl_matrix* current = set3DPoint(x, y, z);
-	return current;
-}
-
-dadras::dadras(double xo, double yo, double zo, double t) :
-	x(xo),
-	y(yo),
-	z(zo),
-	dt(t),
-	a(3),
-	b(2.7),
-	c(1.7),
-	d(2),
-	e(9),
-	attractorName("dadras"){}
-
-dadras::~dadras() {}
-
-void dadras::setVals(double xo, double yo, double zo, double t) {
-	x = xo;
-	y = yo;
-	z = zo;
-	dt = t;
-}
-
-void dadras::iterate() {
-	double dx, dy, dz;
-
-	dx = (y - (a * x) + (b * y * z)) * dt;
-	dy = ((c * y) - (x * z) + z) * dt;
-	dz = ((d * x * y) - (e * z)) * dt;
-
-	x += dx;
-	y += dy;
-	z += dz;
-}
-
-gsl_matrix* dadras::currentCoord() {
-	gsl_matrix* current = set3DPoint(x, y, z);
-	return current;
-}
-
-langford::langford(double xo, double yo, double zo, double t) :
-	x(xo),
-	y(yo),
-	z(zo),
-	dt(t),
-	a(0.95),
-	b(0.7),
-	c(0.6),
-	d(3.5),
-	e(0.25),
-	f(0.1),
-	attractorName("langford"){}
-
-langford::~langford() {}
-
-void langford::setVals(double xo, double yo, double zo, double t) {
-	x = xo;
-	y = yo;
-	z = zo;
-	dt = t;
-}
-
-void langford::iterate() {
-	double dx, dy, dz;
-
-	dx = (((z - b) * x) - (d * y)) * dt;
-	dy = ((d * x) + ((z - b) * y)) * dt;
-	dz = (c + (a * z) - ((z * z * z) / 3.0) 
-	     - ((x * x) + (y * y)) + (1 + (e * z))
-	     + (f * z * x * x * x)) * dt;
-
-	x += dx;
-	y += dy;
-	z += dz;
-}
-
-gsl_matrix* langford::currentCoord() {
-	gsl_matrix* current = set3DPoint(x, y, z);
-	return current;
-}
-
-threeScroll::threeScroll(double xo, double yo, double zo, double t) :
-	x(xo),
-	y(yo),
-	z(zo),
-	dt(t),
-	a(40),
-	b(1.833),
-	c(55),
-	d(0.16),
-	e(0.65),
-	f(20),
-	attractorName("three-scroll"){}
-
-threeScroll::~threeScroll() {}
-
-void threeScroll::setVals(double xo, double yo, double zo, double t) {
-	x = xo;
-	y = yo;
-	z = zo;
-	dt = t;
-}
-
-void threeScroll::iterate() {
-	double dx, dy, dz;
-
-	dx = (a * (y - x) + (d * x * z)) * dt;
-	dy = ((c * x) - (x * z) + (f * y)) * dt;
-	dz = ((b * z) + (x * y) - (e * x * x)) * dt;
-
-	x += dx;
-	y += dy;
-	z += dz;
-}
-
-gsl_matrix* threeScroll::currentCoord() {
-	gsl_matrix* current = set3DPoint(x, y, z);
-	return current;
-}
-
-rabinovichFabrikant::rabinovichFabrikant(double xo, double yo, double zo, double t) :
-	x(xo),
-	y(yo),
-	z(zo),
-	dt(t),
-	alpha(0.14),
-	gamma(0.10),
-	attractorName("rabinovich-fabrikant"){}
-
-rabinovichFabrikant::~rabinovichFabrikant() {}
-
-void rabinovichFabrikant::setVals(double xo, double yo, double zo, double t) {
-	x = xo;
-	y = yo;
-	z = zo;
-	dt = t;
-}
-
-void rabinovichFabrikant::iterate() {
-	double dx, dy, dz;
-
-	dx = (y * (z - 1 + (x * x)) + (gamma * x)) * dt;
-	dy = (x * ((3 * z) + 1 - (x * x))) * dt;
-	dz = ((-2 * z) * (alpha + (x * y))) * dt;
-
-	x += dx;
-	y += dy;
-	z += dz;
-}
-
-gsl_matrix* rabinovichFabrikant::currentCoord() {
-	gsl_matrix* current = set3DPoint(x, y, z);
-	return current;
-}
-
-rossler::rossler(double xo, double yo, double zo, double t) :
-	x(xo),
-	y(yo),
-	z(zo),
-	dt(t),
-	a(0.2),
-	b(0.2),
-	c(5.7),
-	attractorName("rossler"){}
-
-rossler::~rossler() {}
-
-void rossler::setVals(double xo, double yo, double zo, double t) {
-	x = xo;
-	y = yo;
-	z = zo;
-	dt = t;
-}
-
-void rossler::iterate() {
-	double dx, dy, dz;
-
-	dx = (-(y + z)) * dt;
-	dy = (x + (a * y)) * dt;
-	dz = (b + (z * (x - c))) * dt;
-
-	x += dx;
-	y += dy;
-	z += dz;
-}
-
-gsl_matrix* rossler::currentCoord() {
-	gsl_matrix* current = set3DPoint(x, y, z);
-	return current;
-}
-
-quadratic3D::quadratic3D(double xo, double yo, double zo, double t) :
-	x(xo),
-	y(yo),
-	z(zo),
-	dt(t),
-	attractorName("sprott quadratic 3D") {
-	p[0] = -0.875;
-	p[1] = -0.173;
-	p[2] = 0.307;
-	p[3] = -0.436;
-	p[4] = 0.598;
-	p[5] = 0.003;
-	p[6] = -0.039;
-	p[7] = 0.96;
-	p[8] = -0.84;
-	p[9] = 0.855;
-	p[10] = 0.774;
-	p[11] = 0.281;
-	p[12] = -0.015;
-	p[13] = 0.585;
-	p[14] = 0.442;
-	p[15] = -0.18;
-	p[16] = -0.535;
-	p[17] = -0.151;
-	p[18] = -0.971;
-	p[19] = -0.48;
-	p[20] = 0.777;
-	p[21] = 0.418;
-	p[22] = 0.185;
-	p[23] = 0.006;
-	p[24] = 0.45;
-	p[25] = -0.066;
-	p[26] = 0.498;
-	p[27] = 0.142;
-	p[28] = -0.246;
-	p[29] = -0.939;
-}
-
-quadratic3D::~quadratic3D() {}
-
-
-void quadratic3D::setVals(double xo, double yo, double zo, double t) {
-	x = xo;
-	y = yo;
-	z = zo;
-	dt = t;
-}
-
-void quadratic3D::iterate() {
-	double dx, dy, dz;
-
-	dx = (p[0] + (p[1] * x) + (p[2] * y) + (p[3] * z) +
-	     (p[4] * x * y) + (p[5] * x * z) + (p[6] * y * z) +
-	     (p[7] * x * x) + (p[8] * y * y) + (p[9] * z * z)) * dt;
-	dy = (p[10] + (p[11] * x) + (p[12] * y) + (p[13] * z) +
-	     (p[14] * x * y) + (p[15] * x * z) + (p[16] * y * z) +
-	     (p[17] * x * x) + (p[18] * y * y) + (p[19] * z * z)) * dt;
-	dz = (p[20] + (p[21] * x) + (p[22] * y) + (p[23] * z) +
-	     (p[24] * x * y) + (p[25] * x * z) + (p[26] * y * z) +
-	     (p[27] * x * x) + (p[28] * y * y) + (p[29] * z * z)) * dt;
-
-	x += dx;
-	y += dy;
-	z += dz;
-}
-
-gsl_matrix* quadratic3D::currentCoord() {
-	gsl_matrix* current = set3DPoint(x, y, z);
-	return current;
-}
-
-sprottLinz::sprottLinz(double xo, double yo, double zo, double t) :
-	x(xo),
-	y(yo),
-	z(zo),
-	dt(t),
-	a(0.5),
-	attractorName("sprott-linz") {}
-
-sprottLinz::~sprottLinz() {}
-
-void sprottLinz::setVals(double xo, double yo, double zo, double t) {
-	x = xo;
-	y = yo;
-	z = zo;
-	dt = t;
-}
-
-void sprottLinz::iterate() {
-	double dx, dy, dz;
-
-	dx = (y + z) * dt;
-	dy = (-x + (a * y)) * dt;
-	dz = ((x * x) - z) * dt;
-
-	x += dx;
-	y += dy;
-	z += dz;
-}
-
-gsl_matrix* sprottLinz::currentCoord() {
-	gsl_matrix* current = set3DPoint(x, y, z);
-	return current;
-
-}
-
-sprottB::sprottB(double xo, double yo, double zo, double t) :
-	x(xo),
-	y(yo),
-	z(zo),
-	dt(t),
-	a(0.4),
-	b(1.2),
-	c(1),
-	attractorName("sprott B") {}
-
-sprottB::~sprottB() {}
-
-void sprottB::setVals(double xo, double yo, double zo, double t) {
-	x = xo;
-	y = yo;
-	z = zo;
-	dt = t;
-}
-
-void sprottB::iterate() {
-	double dx, dy, dz;
-
-	dx = (a * y * z) * dt;
-	dy = (x - (b * y)) * dt;
-	dz = (c - (x * y)) * dt;
-
-	x += dx;
-	y += dy;
-	z += dz;
-}
-
-gsl_matrix* sprottB::currentCoord() {
-	gsl_matrix* current = set3DPoint(x, y, z);
-	return current;
-
+void attractors::updateTypeID(bool next) {
+	if(next) {
+		if(currentTypeID == 8) currentTypeID = 0;
+		else ++currentTypeID;
+	}
+	else if(!next) {
+		if(!currentTypeID) currentTypeID = 8;
+		else --currentTypeID;
+	}
 }
