@@ -57,8 +57,8 @@ If you should decide to record video, the video file will be saved as "anim.mp4"
 This program uses keyboard controls to change the attractor being displayed.
 
 - W / S: Change X rotation
-- A / D: Change Y rotation scale
-- Z / X: Change Z rotation scale
+- A / D: Change Y rotation
+- Z / X: Change Z rotation
 - Q / E: Change overall rotation (rotation scale multiplier)
 - Up / Down: Change depth of field
 - Left / Right: Change image scale
