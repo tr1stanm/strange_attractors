@@ -3,10 +3,18 @@
 #include <SDL3/SDL_timer.h>
 #include "SDL3_ttf/SDL_ttf.h"
 
+struct color {
+	double r;
+	double g;
+	double b;
+	double a;
+};
+
 struct shader {
 	double rd;
 	double gd;
 	double bd;
+	color background;
 };
 
 class attractors {
@@ -29,6 +37,8 @@ class attractors {
 		void initProjPoints();
 		void updateTypeID(bool);
 		void updateShaderID(bool);
+		void screenShot(std::string);
+		void renderSSText();
 
 		gsl_matrix *rMatrix, *rTotal;
 		gsl_matrix ***testPoints, ***projPoints;
@@ -48,5 +58,7 @@ class attractors {
 		int iterations;
 		int currentTypeID;	// update this as attractors are switched
 		int currentShaderID;
-		int numShaders;
+		int numShaders, numAttractors;
+		bool toExport;
+		int sstime;
 };

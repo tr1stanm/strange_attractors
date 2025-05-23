@@ -281,3 +281,25 @@ void sprottB::iterate() {
 	y += dy;
 	z += dz;
 }
+
+arneodo::arneodo(double xo, double yo, double zo, double t) :
+	strangeAttractor(xo, yo, zo, t),
+	a(-5.5),
+	b(3.5),
+	c(-1) {
+		attractorName = "arneodo";
+	}
+
+arneodo::~arneodo() {}
+
+void arneodo::iterate() {
+	double dx, dy, dz;
+
+	dx = y * dt;
+	dy = z * dt;
+	dz = ((-a * x) - (b * y) - z + (c * x * x * x)) * dt;
+
+	x += dx;
+	y += dy;
+	z += dz;
+}

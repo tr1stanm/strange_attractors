@@ -1,6 +1,7 @@
 #include "3DR.hpp"
 #include "dynamicalsystems.hpp"
 #include "attractors.hpp"
+#include "SDL3_image/SDL_image.h"
 #include <thread>
 #include <sstream>
 #include <iostream>
@@ -18,7 +19,9 @@ attractors::attractors() :
 	iterations(0),
 	currentTypeID(0),
 	currentShaderID(0),
-	numShaders(5)
+	numShaders(6),
+	numAttractors(10),
+	sstime(0)
 {
 	initAttractor_typeID();
 	attractors::initRMatrix();
@@ -29,6 +32,14 @@ attractors::attractors() :
 	testPoints = initTestPoints(attractor);
 	attractors::initProjPoints();
 	attractors::gfxInit("strange-attractors", CANVASSIZE, CANVASSIZE, false);
+
+	char userResponse;
+	printf("export frames to video? (y/n): ");
+	scanf("%c", &userResponse);
+	if(userResponse == 'y' || userResponse == 'Y') {
+		toExport = true;
+		system("mkdir ./.anim");
+	}
 }
 
 attractors::~attractors() {
@@ -47,6 +58,13 @@ attractors::~attractors() {
 	for(int i = 0; i < NUM_TESTPTS; ++i) delete attractor[i];
 	delete[] attractor;
 	TTF_CloseFont(font);
+
+	if(toExport) {
+		system("[ ! -d anims ] && mkdir anims");
+		system("ffmpeg -f image2 -framerate 60 -i ./.anim/frame_%04d.png -vcodec libx264 -pix_fmt yuv420p -crf 17 anims/anim.mp4");
+		system("rm -r ./.anim/");
+	}
+	std::cout << "\rquitting program...\n";
 }
 
 void attractors::initShaders() {
@@ -55,22 +73,50 @@ void attractors::initShaders() {
 	shaders[0].rd = 255.0 / NUM_TESTPTS;
 	shaders[0].gd = NUM_TESTPTS;
 	shaders[0].bd = 510.0 / NUM_TESTPTS;
+	shaders[0].background.r = 0;
+	shaders[0].background.g = 0;
+	shaders[0].background.b = 0;
+	shaders[0].background.a = 255;
 
 	shaders[1].rd = 120.0 / NUM_TESTPTS;
 	shaders[1].gd = 0;
 	shaders[1].bd = 700.0 / NUM_TESTPTS;
+	shaders[1].background.r = 57;
+	shaders[1].background.g = 37;
+	shaders[1].background.b = 81;
+	shaders[1].background.a = 255;
 
 	shaders[2].rd = 500.0 / NUM_TESTPTS;
 	shaders[2].gd = 60;
 	shaders[2].bd = 120;
+	shaders[2].background.r = 52;
+	shaders[2].background.g = 112;
+	shaders[2].background.b = 99;
+	shaders[2].background.a = 255;
 
 	shaders[3].rd = 510.0 / NUM_TESTPTS;
 	shaders[3].gd = 1000.0 / NUM_TESTPTS;
 	shaders[3].bd = 55;
+	shaders[3].background.r = 48;
+	shaders[3].background.g = 61;
+	shaders[3].background.b = 133;
+	shaders[3].background.a = 255;
 	
 	shaders[4].rd = 0;
 	shaders[4].gd = 120.0 / NUM_TESTPTS;
 	shaders[4].bd = 300.0 / NUM_TESTPTS;
+	shaders[4].background.r = 8;
+	shaders[4].background.g = 12;
+	shaders[4].background.b = 62;
+	shaders[4].background.a = 255;
+
+	shaders[5].rd = 300.0 / NUM_TESTPTS;
+	shaders[5].gd = 0;
+	shaders[5].bd = 60.0 / NUM_TESTPTS;
+	shaders[5].background.r = 100;
+	shaders[5].background.g = 15;
+	shaders[5].background.b = 15;
+	shaders[5].background.a = 255;
 }
 
 void attractors::updateShaderID(bool next) {
@@ -176,11 +222,56 @@ void attractors::handleEvents() {
 					updateTypeID(false);
 					switchAttractor();
 					break;
+				case SDLK_1:
+					currentTypeID = 0;
+					switchAttractor();
+					break;
+				case SDLK_2:
+					currentTypeID = 1;
+					switchAttractor();
+					break;
+				case SDLK_3:
+					currentTypeID = 2;
+					switchAttractor();
+					break;
+				case SDLK_4:
+					currentTypeID = 3;
+					switchAttractor();
+					break;
+				case SDLK_5:
+					currentTypeID = 4;
+					switchAttractor();
+					break;
+				case SDLK_6:
+					currentTypeID = 5;
+					switchAttractor();
+					break;
+				case SDLK_7:
+					currentTypeID = 6;
+					switchAttractor();
+					break;
+				case SDLK_8:
+					currentTypeID = 7;
+					switchAttractor();
+					break;
+				case SDLK_9:
+					currentTypeID = 8;
+					switchAttractor();
+					break;
+				case SDLK_0:
+					currentTypeID = 9;
+					switchAttractor();
+					break;
 				case SDLK_O:
 					updateShaderID(false);
 					break;
 				case SDLK_P:
 					updateShaderID(true);
+					break;
+				case SDLK_C:
+					system("[ ! -d screenshots ] && mkdir screenshots");
+					screenShot("screenshots");
+					sstime = 255;
 					break;
 				default:
 					break;
@@ -189,6 +280,37 @@ void attractors::handleEvents() {
 			initRMatrix();
 			break;
 	}
+}
+
+void attractors::screenShot(std::string path) {
+	char fname[200];
+
+	snprintf(fname, 200, "./%s/frame_%06d.png", path.c_str(), iterations);
+	SDL_Surface *surface = SDL_RenderReadPixels(renderer, NULL);
+	IMG_SavePNG(surface, fname);
+}
+
+void attractors::renderSSText() {
+	std::stringstream text;
+	SDL_Color color;
+	SDL_FRect dest;
+	color.r = color.b = color.g = 255;
+	color.a = sstime;
+	sstime -= 2;
+	if(sstime < 0) sstime = 0;
+
+	dest.x = (CANVASSIZE / 4.0) - 10;
+	dest.y = 10;
+	dest.w = 3 * CANVASSIZE / 4.0;
+	dest.h = 20;
+
+	text << "screenshot saved in " << SDL_GetBasePath() << "screenshots/.";
+
+	SDL_Surface *textSurf = TTF_RenderText_Solid_Wrapped(font, text.str().c_str(), 0, color, 0);
+	SDL_Texture *tex = SDL_CreateTextureFromSurface(renderer, textSurf);
+	SDL_RenderTexture(renderer, tex, NULL, &dest);
+	SDL_DestroySurface(textSurf);
+	SDL_DestroyTexture(tex);
 }
 
 void attractors::renderText() {
@@ -264,6 +386,11 @@ void attractors::initAttractor_typeID() {
 			attractor = initAttractor<sprottB>(0.05, 5);
 			projDepth = 25;
 			break;
+		case 9:
+			attractor = initAttractor<arneodo>(0.005, 2);
+			projDepth = 30;
+			projScale = 800;
+			break;
 		default:
 			// this would be bad
 			std::cerr << "error: no attractor with typeID " << currentTypeID << "exists.\n";
@@ -300,13 +427,17 @@ void attractors::switchAttractor() {
 	iterations = 0;
 	for(int i = 0; i < NUM_TESTPTS; ++i) delete attractor[i];
 	delete[] attractor;
+	// initializes new attractor based on current typeID
 	initAttractor_typeID();
 	testPoints = initTestPoints(attractor);
 }
 
 void attractors::update() {
 	handleEvents();
-	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+	SDL_SetRenderDrawColor(renderer, currentShader.background.r,
+					 currentShader.background.g,
+					 currentShader.background.b,
+					 currentShader.background.a);
 	SDL_RenderClear(renderer);
 
 	if(iterations >= NUMPOINTS) {
@@ -329,6 +460,8 @@ void attractors::update() {
 
 	// rendering
 	renderText();
+	if(toExport) screenShot(".anim");
+	if(sstime) renderSSText();
 	SDL_RenderPresent(renderer);
 
 	++iterations;
@@ -360,13 +493,13 @@ void attractors::plotInRange(int start_totalPts, int end_totalPts) {
 			gsl_matrix_free(rotated);
 		}
 	}
-	
 }
 
 void attractors::drawAttractor() {
-	if(iterations >= NUMPOINTS) iterations = NUMPOINTS;
+	int ptsToDraw = iterations;
+	if(iterations >= NUMPOINTS) ptsToDraw = NUMPOINTS;
 	for(int j = 0; j < NUM_TESTPTS; ++j) {
-		for(int k = 0; k < iterations - 1; ++k) {
+		for(int k = 0; k < ptsToDraw - 1; ++k) {
 			SDL_SetRenderDrawColor(renderer, j * currentShader.rd, 
 							 j * currentShader.gd, 
 							 j * currentShader.bd, 
@@ -375,12 +508,11 @@ void attractors::drawAttractor() {
 		}
 	}
 	for(int j = 0; j < NUM_TESTPTS; ++j) {
-		for(int k = 0; k < iterations; ++k) {
+		for(int k = 0; k < ptsToDraw; ++k) {
 			if(projPoints[j][k]) gsl_matrix_free(projPoints[j][k]);
 			projPoints[j][k] = nullptr;
 		}
 	}
-	
 }
 
 bool attractors::isRunning() {
@@ -389,11 +521,11 @@ bool attractors::isRunning() {
 
 void attractors::updateTypeID(bool next) {
 	if(next) {
-		if(currentTypeID == 8) currentTypeID = 0;
+		if(currentTypeID == numAttractors - 1) currentTypeID = 0;
 		else ++currentTypeID;
 	}
 	else if(!next) {
-		if(!currentTypeID) currentTypeID = 8;
+		if(!currentTypeID) currentTypeID = numAttractors - 1;
 		else --currentTypeID;
 	}
 }

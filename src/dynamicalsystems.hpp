@@ -6,7 +6,7 @@ class strangeAttractor {
 	public:
 		strangeAttractor(double = 0, double = 0, double = 0, double = 0.005);
 		virtual ~strangeAttractor();
-		virtual void iterate();
+		virtual void iterate() = 0;
 		void setVals(double, double, double, double);
 		gsl_matrix* currentCoord();
 
@@ -100,6 +100,15 @@ class sprottB : public strangeAttractor {
 	public:
 		sprottB(double = 0, double = 0, double = 0, double = 0.005);
 		~sprottB();
+		void iterate();
+	private:
+		double a, b, c;
+};
+
+class arneodo : public strangeAttractor {
+	public:
+		arneodo(double = 0, double = 0, double = 0, double = 0.005);
+		~arneodo();
 		void iterate();
 	private:
 		double a, b, c;
