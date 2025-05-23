@@ -21,7 +21,7 @@ The attractors currently supported with this software are:
 
 ## Getting Started
 
-### Prerequisites
+### Dependencies
 
 SDL3 (https://wiki.libsdl.org/SDL3/FrontPage)
 
@@ -29,13 +29,15 @@ CMake (https://cmake.org/)
 
 GNU Scientific Library (https://www.gnu.org/software/gsl/)
 
+FFMPEG (https://ffmpeg.org/)
+
 If you have homebrew, apt, or a similar package manager, these tools can all be installed using those.
 
 This project has only been compiled and tested on Mac, but afaik SDL has pretty decent cross-compilation support. I'd be curious to hear if it works well or at all on other platforms.
 
 ### Installing
 
-Once the prerequisites have been installed, navigate to the project directory in your terminal and run the command:
+Once the dependencies have been installed, navigate to the project directory in your terminal and run the command:
 
 `cmake -B build`
 
@@ -44,7 +46,11 @@ followed by:
 `cmake --build build`
 
 
-This should generate an executable ("dynsys") in your build folder. Run the file by double clicking it or from the command line with `./build/dynsys` and have fun!
+This should generate an executable ("dynsys") in your build folder. Run the file by double clicking it, or from the command line with 
+
+`./build/dynsys` 
+
+If you should decide to record video, the video file will be saved as "anim.mp4" in a folder marked "anims" in the project directory folder.
 
 ## Keyboard Controls
 
@@ -60,6 +66,7 @@ This program uses keyboard controls to change the attractor being displayed.
 - I / K / J / L: Pan image
 - O / P: Change color scheme
 - < / >: Change current attractor being displayed
+- C: Take a screenshot (saves to screenshots folder in project directory)
 
 ## Screenshots and Examples
 
@@ -77,6 +84,6 @@ Here are some screenshots of various dynamic systems generated using this progra
 
 # Author
 
-All code and testing for this project was written by Tristan Miller.
+All code and testing for this project not mentioned as part of the dependencies was written by Tristan Miller.
 
 Please credit me if you refer to it somewhere.
