@@ -302,7 +302,7 @@ void attractors::renderSSText() {
 	dest.x = (CANVASSIZE / 4.0) - 10;
 	dest.y = 10;
 	dest.w = 3 * CANVASSIZE / 4.0;
-	dest.h = 20;
+	dest.h = 15;
 
 	text << "screenshot saved in " << SDL_GetBasePath() << "screenshots/.";
 
