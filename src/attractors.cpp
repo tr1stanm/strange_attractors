@@ -471,12 +471,13 @@ void attractors::plot() {
 	int ptsToPlot = iterations;
 	if(ptsToPlot >= NUMPOINTS) ptsToPlot = NUMPOINTS;
 	std::vector<std::thread> threads;
-	for(int i = 0; i < 200; ++i) {
+	int threadCount = 8;
+	for(int i = 0; i < threadCount; ++i) {
 		threads.emplace_back(&attractors::plotInRange, this,
-				     ptsToPlot * i / 200,
-				     ptsToPlot * (i + 1) / 200);
+				     ptsToPlot * i / threadCount,
+				     ptsToPlot * (i + 1) / threadCount);
 	}
-	for(int i = 0; i < 200; ++i) {
+	for(int i = 0; i < threadCount; ++i) {
 		threads[i].join();
 	}
 
