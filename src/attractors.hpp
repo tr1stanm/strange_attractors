@@ -25,7 +25,7 @@ class attractors {
 		void update();
 	private:
 		void initAttractor_typeID();
-		void gfxInit(const char*, int, int, bool);
+		void gfxInit(const char*, int, int);
 		void initShaders();
 		void handleEvents();
 		void plot();
@@ -61,4 +61,5 @@ class attractors {
 		int numShaders, numAttractors;
 		bool toExport;
 		int sstime;
+		int currentW, currentH;
 };

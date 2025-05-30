@@ -2,6 +2,7 @@
 #include "dynamicalsystems.hpp"
 #include "attractors.hpp"
 #include "SDL3_image/SDL_image.h"
+#include "SDL3/SDL_video.h"
 #include <thread>
 #include <sstream>
 #include <iostream>
@@ -21,7 +22,10 @@ attractors::attractors() :
 	currentShaderID(0),
 	numShaders(6),
 	numAttractors(10),
-	sstime(0)
+	toExport(false),
+	sstime(0),
+	currentW(CANVASSIZE),
+	currentH(CANVASSIZE)
 {
 	initAttractor_typeID();
 	attractors::initRMatrix();
@@ -31,7 +35,7 @@ attractors::attractors() :
 	currentShader = shaders[0];
 	testPoints = initTestPoints(attractor);
 	attractors::initProjPoints();
-	attractors::gfxInit("strange-attractors", CANVASSIZE, CANVASSIZE, false);
+	attractors::gfxInit("strange-attractors", CANVASSIZE, CANVASSIZE);
 
 	char userResponse;
 	printf("export frames to video? (y/n): ");
@@ -131,8 +135,8 @@ void attractors::updateShaderID(bool next) {
 	currentShader = shaders[currentShaderID];
 }
 
-void attractors::gfxInit(const char *title, int w, int h, bool isFullscreen) {
-	window = SDL_CreateWindow(title, w, h, isFullscreen);
+void attractors::gfxInit(const char *title, int w, int h) {
+	window = SDL_CreateWindow(title, w, h, SDL_WINDOW_RESIZABLE);
 	if(window) {
 		renderer = SDL_CreateRenderer(window, NULL);
 		if(DEBUG) printf("window created.\n");
@@ -157,6 +161,10 @@ void attractors::handleEvents() {
 	switch(event.type) {
 		case SDL_EVENT_QUIT:
 			running = false;
+			break;
+		case SDL_EVENT_WINDOW_RESIZED:
+		case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED:
+			SDL_GetWindowSize(window, &currentW, &currentH);
 			break;
 		case SDL_EVENT_KEY_DOWN:
 			switch(event.key.key) {
@@ -299,10 +307,13 @@ void attractors::renderSSText() {
 	sstime -= 2;
 	if(sstime < 0) sstime = 0;
 
-	dest.x = (CANVASSIZE / 4.0) - 10;
-	dest.y = 10;
-	dest.w = 3 * CANVASSIZE / 4.0;
+	double textScaleFactor;
+	if(currentH < currentW) textScaleFactor = currentH;
+	else textScaleFactor = currentW;
+	dest.w = 3 * textScaleFactor / 4.0;
 	dest.h = 15;
+	dest.x = currentW - dest.w;
+	dest.y = 10;
 
 	text << "screenshot saved in " << SDL_GetBasePath() << "screenshots/.";
 
@@ -321,10 +332,13 @@ void attractors::renderText() {
 	text.setf(std::ios::fixed);
 	text.precision(2);
 
+	double textScaleFactor;
+	if(currentH < currentW) textScaleFactor = currentH;
+	else textScaleFactor = currentW;
+	dest.w = 3 * textScaleFactor / 10.0;
+	dest.h = textScaleFactor / 5.0;
 	dest.x = 10;
-	dest.y =  4 * CANVASSIZE / 5.0;
-	dest.w = 3 * CANVASSIZE / 10.0;
-	dest.h = CANVASSIZE / 5.0;
+	dest.y = currentH - dest.h;
 
 	text << attractor[0]->attractorName << " attractor\n";
 	text << "x rotation: " << xRotateScale * rotationAngle << "\n";
@@ -505,7 +519,8 @@ void attractors::drawAttractor() {
 							 j * currentShader.gd, 
 							 j * currentShader.bd, 
 							 255);
-			plotVector(renderer, projPoints[j][k], projPoints[j][k+1], xDelta, yDelta);
+			plotVector(renderer, projPoints[j][k], projPoints[j][k+1],
+				   currentW, currentH, xDelta, yDelta);
 		}
 	}
 	for(int j = 0; j < NUM_TESTPTS; ++j) {

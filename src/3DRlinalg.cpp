@@ -202,24 +202,26 @@ void printMatrix(gsl_matrix *M) {
 }
 
 // set render draw color before using
-void plotPoint(SDL_Renderer *renderer, gsl_matrix *toPlot, double xDelta, double yDelta) {
+void plotPoint(SDL_Renderer *renderer, gsl_matrix *toPlot, 
+	       double currentW, double currentH, double xDelta, double yDelta) {
 	if(toPlot->size1 != 2 || toPlot->size2 != 1) {
 		printf("error: cannot plot a point from a non-2x1 matrix.\n");
 		return;
 	}
 
-	SDL_RenderPoint(renderer, gsl_matrix_get(toPlot, 0, 0) + QUADSIZE + xDelta,
-			              gsl_matrix_get(toPlot, 1, 0) + QUADSIZE + yDelta);
+	SDL_RenderPoint(renderer, gsl_matrix_get(toPlot, 0, 0) + currentW + xDelta,
+			          gsl_matrix_get(toPlot, 1, 0) + currentH + yDelta);
 }
 
-void plotVector(SDL_Renderer *renderer, gsl_matrix *p1, gsl_matrix* p2, double xDelta, double yDelta) {
+void plotVector(SDL_Renderer *renderer, gsl_matrix *p1, gsl_matrix* p2, 
+		double currentW, double currentH, double xDelta, double yDelta) {
 	if(p1->size1 != 2 || p1->size2 != 1 || p2->size1 != 2 || p2->size2 != 1) {
 		printf("error: cannot plot a vector from non-2x1 matrices.\n");
 		return;
 	}
 
-	SDL_RenderLine(renderer, gsl_matrix_get(p1, 0, 0) + QUADSIZE + xDelta, 
-				     gsl_matrix_get(p1, 1, 0) + QUADSIZE + yDelta,
-	       		             gsl_matrix_get(p2, 0, 0) + QUADSIZE + xDelta, 
-				     gsl_matrix_get(p2, 1, 0) + QUADSIZE + yDelta);
+	SDL_RenderLine(renderer, gsl_matrix_get(p1, 0, 0) + (currentW / 2) + xDelta, 
+				 gsl_matrix_get(p1, 1, 0) + (currentH / 2) + yDelta,
+	       		         gsl_matrix_get(p2, 0, 0) + (currentW / 2) + xDelta, 
+				 gsl_matrix_get(p2, 1, 0) + (currentH / 2) + yDelta);
 }
