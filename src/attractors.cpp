@@ -205,16 +205,16 @@ void attractors::handleEvents() {
 					projScale += 10;
 					break;
 				case SDLK_I:
-					yDelta -= 1;
+					yDelta -= 5;
 					break;
 				case SDLK_K:
-					yDelta += 1;
+					yDelta += 5;
 					break;
 				case SDLK_J:
-					xDelta -= 1;
+					xDelta -= 5;
 					break;
 				case SDLK_L:
-					xDelta += 1;
+					xDelta += 5;
 					break;
 				case SDLK_SPACE:
 					xRotateScale = 0;
@@ -296,6 +296,7 @@ void attractors::screenShot(std::string path) {
 	snprintf(fname, 200, "./%s/frame_%06d.png", path.c_str(), iterations);
 	SDL_Surface *surface = SDL_RenderReadPixels(renderer, NULL);
 	IMG_SavePNG(surface, fname);
+	SDL_DestroySurface(surface);
 }
 
 void attractors::renderSSText() {
@@ -380,8 +381,8 @@ void attractors::initAttractor_typeID() {
 			break;
 		case 4: 
 			attractor = initAttractor<threeScroll>(0.0005, 5);
-			projDepth = 175;
-			projScale = 250;
+			projDepth = 225;
+			projScale = 350;
 			break;
 		case 5: 
 			attractor = initAttractor<rabinovichFabrikant>(0.0005, 5);
@@ -439,8 +440,13 @@ void attractors::switchAttractor() {
 	xDelta = yDelta = 0;
 	rotationAngle = 1;
 	iterations = 0;
-	for(int i = 0; i < NUM_TESTPTS; ++i) delete attractor[i];
+	for(int i = 0; i < NUM_TESTPTS; ++i) {
+		for(int j = 0; j < NUMPOINTS; ++j) gsl_matrix_free(testPoints[i][j]);
+		delete[] testPoints[i];
+		delete attractor[i];
+	}
 	delete[] attractor;
+	delete[] testPoints;
 	// initializes new attractor based on current typeID
 	initAttractor_typeID();
 	testPoints = initTestPoints(attractor);

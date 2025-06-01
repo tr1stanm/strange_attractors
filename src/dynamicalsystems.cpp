@@ -5,7 +5,7 @@
 
 // current attractors supported: 
 // lorenz, halvorsen, dadras, langford, threeScroll, rabinovichFabrikant, rossler, sprottB
-const int CANVASSIZE = 800;
+const int CANVASSIZE = 600;
 const double QUADSIZE = CANVASSIZE / 2.0;
 const int NUMPOINTS = 500;
 const int NUM_TESTPTS = 50;
