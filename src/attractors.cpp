@@ -339,7 +339,7 @@ void attractors::renderText() {
 	dest.w = 3 * textScaleFactor / 10.0;
 	dest.h = textScaleFactor / 5.0;
 	dest.x = 10;
-	dest.y = currentH - dest.h;
+	dest.y = currentH - dest.h - 10;
 
 	text << attractor[0]->attractorName << " attractor\n";
 	text << "x rotation: " << xRotateScale * rotationAngle << "\n";

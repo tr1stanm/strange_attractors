@@ -4,13 +4,13 @@
 #include <SDL3/SDL_timer.h>
 
 // current attractors supported: 
-// lorenz, halvorsen, dadras, langford, threeScroll, rabinovichFabrikant, rossler, sprottB
-const int CANVASSIZE = 600;
-const double QUADSIZE = CANVASSIZE / 2.0;
-const int NUMPOINTS = 500;
-const int NUM_TESTPTS = 50;
-const int FPS = 60;
-const bool DEBUG = false;
+// lorenz, halvorsen, dadras, langford, threeScroll, rabinovichFabrikant, rossler, sprottB, sprottLinz, arneodo
+
+const int CANVASSIZE = 600;		// initial window size (resizable on launch)
+const int NUMPOINTS = 500;		// number of points drawn for each line
+const int NUM_TESTPTS = 50;		// number of lines
+const int FPS = 60;			// frame rate limiter
+const bool DEBUG = false;		// set to true if functionality of certain gfx features needs to be checked
 
 int main() {
 	const double frameDelay = 1000.0/FPS;

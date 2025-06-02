@@ -11,7 +11,7 @@ extern const bool DEBUG;
 gsl_matrix* matrixMul(gsl_matrix*, gsl_matrix*);
 gsl_matrix* matrixPower(gsl_matrix*, int);
 void printMatrix(gsl_matrix*);
-void plotPoint(SDL_Renderer*, gsl_matrix*, double, double);
+void plotPoint(SDL_Renderer*, gsl_matrix*, double, double, double, double);
 void plotVector(SDL_Renderer*, gsl_matrix*, gsl_matrix*, double, double, double, double);
 gsl_matrix* setPoint(double, double);
 gsl_matrix* set3DPoint(double, double, double);
