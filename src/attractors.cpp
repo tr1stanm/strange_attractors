@@ -3,6 +3,7 @@
 #include "attractors.hpp"
 #include "SDL3_image/SDL_image.h"
 #include "SDL3/SDL_video.h"
+#include <vector>
 #include <thread>
 #include <sstream>
 #include <iostream>

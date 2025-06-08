@@ -1,5 +1,6 @@
 #include "3DR.hpp"
 #include <string>
+#include <time.h>
 #pragma once
 
 class strangeAttractor {
