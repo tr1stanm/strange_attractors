@@ -4,3 +4,4 @@ screenshots
 *.mp4
 .DS_Store
 src/tinkerbell.cpp
+.cache
