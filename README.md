@@ -33,7 +33,7 @@ FFMPEG (https://ffmpeg.org/)
 
 If you have homebrew, apt, or a similar package manager, these tools can all be installed using those.
 
-This project has only been compiled and tested on Mac, but afaik SDL has pretty decent cross-compilation support. I'd be curious to hear if it works well or at all on other platforms.
+This project has to date been compiled and tested on both Mac and Linux (arch btw). The only current necessary packages to install outside of what is included with the project are GSL, FFMPEG and Cmake.
 
 ### Installing
 
