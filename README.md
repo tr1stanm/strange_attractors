@@ -39,11 +39,11 @@ This project has to date been compiled and tested on both Mac and Linux (arch bt
 
 Once the dependencies have been installed, navigate to the project directory in your terminal and run the command:
 
-`cmake -B build`
+`cmake --preset default`
 
 followed by:
 
-`cmake --build build`
+`cmake --build build --preset default`
 
 
 This should generate an executable ("dynsys") in your build folder. Run the file by double clicking it, or from the command line with 
