@@ -1,0 +1,12 @@
+{
+    "version": 3,
+    "configurePresets": [{
+        "name": "default",
+        "binaryDir": "build"
+    }],
+    "buildPresets": [{
+        "name": "default",
+        "configurePreset": "default",
+        "jobs": 24
+    }]
+}
